@@ -408,7 +408,6 @@ public class MongoWorker implements Runnable {
         if (maxCollections > 1) {
             coll = colls.get(lastCollection);
             lastCollection = getRandomInt(0, maxCollections-1);
-            logger.warn("rotateCollection(): worker: " + workerID + " coll: " + lastCollection);
         }
     }
 
