@@ -37,7 +37,7 @@ public class MongoWorker implements Runnable {
     private int workerID;
     private int sequence;
     private int numShards = 0;
-    private Random rng;
+    private Random rng = new Random();
     private ZipfDistribution zipf;
     private boolean workflowed = false;
     private boolean zipfian = false;
@@ -177,7 +177,6 @@ public class MongoWorker implements Runnable {
         sequence = getHighestID();
 
         ReviewShards();
-        rng = new Random();
         if (testOpts.zipfian) {
             zipfian = true;
             zipf = new ZipfDistribution(testOpts.zipfsize, 0.99);
@@ -401,10 +400,15 @@ public class MongoWorker implements Runnable {
         }
     }
 
+    private int getRandomInt(int min, int max) {
+    	return rng.nextInt(max - min) + min;
+    }
+
     private void rotateCollection() {
         if (maxCollections > 1) {
             coll = colls.get(lastCollection);
-            lastCollection = (lastCollection + 1) % maxCollections;
+            lastCollection = getRandomInt(0, maxCollections-1);
+            logger.warn("rotateCollection(): worker: " + workerID + " coll: " + lastCollection);
         }
     }
 
