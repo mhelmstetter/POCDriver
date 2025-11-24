@@ -24,6 +24,7 @@ public class POCTestOptions {
 	int rangequeries=0;
 	int duration = 18000;
 	int numShards = 1;
+	int[] shardIndexes = null;
 	String logfile = null;
 	boolean sharded = false;
 	boolean singleserver = false;
@@ -108,6 +109,7 @@ public class POCTestOptions {
 
 		cliopt.addOption(null,"opratio",false,"Maintain a strict ratio of number of ops not time - legacy mode");
 		cliopt.addOption(null,"location",true,"Adds a location field in the payload ( agrs : comma,seperated,list,of,country,code,)");
+		cliopt.addOption(null,"shardIndexes",true,"Comma-separated list of shard indexes to target (e.g., 0,1 to only use first two shards)");
 
 
 		CommandLine cmd = parser.parse(cliopt, args);
@@ -330,6 +332,14 @@ public class POCTestOptions {
 				locationCodes = null;
 			}
 
+		}
+
+		if(cmd.hasOption("shardIndexes")){
+			String[] strs = cmd.getOptionValue("shardIndexes").split(",");
+			shardIndexes = new int[strs.length];
+			for(int i=0;i<strs.length;i++){
+				shardIndexes[i] = Integer.parseInt(strs[i].trim());
+			}
 		}
 	}
 }

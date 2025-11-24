@@ -106,8 +106,14 @@ public class MongoWorker implements Runnable {
             }
 
             // And move that to a shard - which shard? take my workerid and mod
-            // it with the number of shards
-            int shardno = workerID % testOpts.numShards;
+            // it with the number of shards (or use specified shard indexes if provided)
+            int shardno;
+            if (testOpts.shardIndexes != null && testOpts.shardIndexes.length > 0) {
+                // Distribute workers across only the specified shard indexes
+                shardno = testOpts.shardIndexes[workerID % testOpts.shardIndexes.length];
+            } else {
+                shardno = workerID % testOpts.numShards;
+            }
             // Get the name of the shard
 
             MongoCursor<Document> shardlist = mongoClient.getDatabase("config").getCollection("shards").find()
