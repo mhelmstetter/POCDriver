@@ -23,7 +23,7 @@ public class POCDriver {
         LogManager.getLogManager().reset();
         Logger logger = LoggerFactory.getLogger(POCDriver.class);
 
-        logger.info("MongoDB Proof Of Concept  - Load Generator version 0.1.2");
+        logger.info("MongoDB Proof Of Concept  - Load Generator version 4.2");
         try {
             testOpts = new POCTestOptions(args);
             // Quit after displaying help message

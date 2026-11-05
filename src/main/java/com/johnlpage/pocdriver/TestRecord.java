@@ -1,6 +1,5 @@
 package com.johnlpage.pocdriver;
 
-
 import java.util.*;
 
 import org.bson.BsonBinarySubType;
@@ -12,57 +11,55 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.Random;
 
-
 //A Test Record is a MongoDB Record Object that is self populating
 
 public class TestRecord {
 	Logger logger;
 	Document internalDoc;
 	private Random rng;
-	private static ArrayList<ArrayList<Integer>> ar;
+	private static ArrayList<ArrayList<Long>> ar;
 	private static String loremText = null;
 
 	private static Binary blobData = null;
 
 	private String CreateString(int length) {
 
-		if( loremText == null )
-		{
+		if (loremText == null) {
 			loremText = "";
 			LoremIpsum loremIpsum = new LoremIpsum();
 
-			loremText = loremIpsum.getWords( 1000 );
+			loremText = loremIpsum.getWords(1000);
 		}
 
 		StringBuilder sb = new StringBuilder();
 		Double d = rng.nextDouble();
 
 		int loremLen = 512;
-		int r = (int) Math.abs(Math.floor( d * (loremText.length() - (loremLen + 20))));
+		int r = (int) Math.abs(Math.floor(d * (loremText.length() - (loremLen + 20))));
 		int e = r + loremLen;
 
-		while(loremText.charAt(r) != ' ') r++; r++;
-		while(loremText.charAt(e) != ' ') e++;
+		while (loremText.charAt(r) != ' ')
+			r++;
+		r++;
+		while (loremText.charAt(e) != ' ')
+			e++;
 		String chunk = loremText.substring(r, e);
 
 		sb.append(chunk);
 
+		// Double to size
 
-		//Double to size
-
-		while(sb.length() < length)
-		{
-			logger.info(" SB " + sb.length() + " of " + length);
-			sb.append(sb.toString());
+		while (sb.length() < length) {
+			sb.append(sb);
 		}
 
-		//Trim to fit
-		String rs = sb.toString().substring(0,length);
+		// Trim to fit
+		String rs = sb.toString().substring(0, length);
 
-		//Remove partial words
-		r=0;
-		e=rs.length() -1;
-		while(rs.charAt(e) != ' ') e--;
+		// Remove partial words
+		r = 0;
+		e = rs.length() - 1;
+		// while(rs.charAt(e) != ' ') e--;
 		rs = rs.substring(r, e);
 		return rs;
 	}
@@ -73,7 +70,7 @@ public class TestRecord {
 	// A thread starting will find out what it's highest was
 
 	private void AddOID(int workerid, int sequence) {
-		Document oid = new Document("w",workerid).append("i", sequence);
+		Document oid = new Document("w", workerid).append("i", sequence);
 		internalDoc.append("_id", oid);
 	}
 
@@ -81,36 +78,38 @@ public class TestRecord {
 	// Useful for querying, indexing etc
 
 	private static int getFieldType(int fieldno) {
-		if (fieldno == 0) {
-			return 0; // Int
-		}
 
-		if (fieldno == 1) {
-			return 2; // Date
-		}
+		  if (fieldno == 0) {
+		  return 0; // Int
+		  }
 
-		if (fieldno == 3) {
-			return 1; // Text
-		}
+		  if (fieldno == 1) {
+		  return 2; // Date
+		  }
 
-		if (fieldno % 3 == 0) {
-			return 0; // Integer
-		}
+		  if (fieldno == 3) {
+		  return 1; // Text
+		  }
 
-		if (fieldno % 5 == 0) {
-			return 2; // Date
-		}
+		  if (fieldno % 3 == 0) {
+		  return 0; // Integer
+		  }
 
-		return 1; // Text
+		  if (fieldno % 5 == 0) {
+		  return 2; // Date
+		  }
+
+		  return 1; // Text
 	}
 
 	TestRecord(POCTestOptions testOpts) {
-		
+
 		this(testOpts.numFields, testOpts.depth, testOpts.textFieldLen, testOpts.workingset, 0,
-				testOpts.NUMBER_SIZE, new int[]{testOpts.arraytop, testOpts.arraynext}, testOpts.blobSize, null);
+				testOpts.NUMBER_SIZE, new int[] { testOpts.arraytop, testOpts.arraynext }, testOpts.blobSize, null);
 	}
 
-	TestRecord(int nFields, int depth, int stringLength, int workerID, int sequence, long numberSize, int[] array, int binsize, String[] locations) {
+	TestRecord(int nFields, int depth, int stringLength, int workerID, int sequence, long numberSize, int[] array,
+			int binsize, String[] locations) {
 		logger = LoggerFactory.getLogger(TestRecord.class);
 		internalDoc = new Document();
 		rng = new Random();
@@ -120,22 +119,27 @@ public class TestRecord {
 
 		addFields(internalDoc, 0, nFields, depth, stringLength, numberSize);
 
-		if(locations != null && locations.length > 0){
+		if (locations != null && locations.length > 0) {
 			int random = new Random().nextInt(locations.length);
 			internalDoc.append("location", locations[random]);
 		}
+		ArrayList<Long> sa = new ArrayList<Long>(array[1]);
 		if (array[0] > 0) {
 			if (ar == null) {
-				ar = new ArrayList<ArrayList<Integer>>(array[0]);
+				ar = new ArrayList<ArrayList<Long>>(array[0]);
+				
 				for (int q = 0; q < array[0]; q++) {
-					ArrayList<Integer> sa = new ArrayList<Integer>(array[1]);
+					sa.clear();;
 					for (int w = 0; w < array[1]; w++) {
-						sa.add(0);
+
+						Long r = (long) Math.abs(Math.floor(rng.nextGaussian()
+								* numberSize));
+						sa.add(r);
 					}
 					ar.add(sa);
 				}
 			}
-			internalDoc.append("arr", ar);
+			internalDoc.append("arr", sa);
 		}
 		if (blobData == null) {
 			byte[] data = new byte[binsize * 1024];
@@ -147,7 +151,7 @@ public class TestRecord {
 	}
 
 	/**
-	 * @param seq	 The sequence for this document as a whole
+	 * @param seq     The sequence for this document as a whole
 	 * @param nFields The numbers of fields for this sub-document
 	 * @return the number of new fields added
 	 */
@@ -195,23 +199,23 @@ public class TestRecord {
 		return fieldNo - seq;
 	}
 
-    public List<String> listFields() {
-        List<String> fields = new ArrayList<String>();
-        collectFields(internalDoc, "", fields);
-        return fields;
-    }
+	public List<String> listFields() {
+		List<String> fields = new ArrayList<String>();
+		collectFields(internalDoc, "", fields);
+		return fields;
+	}
 
-    private void collectFields(Document doc, String prefix, List<String> fields) {
-        Set<String> keys = doc.keySet();
-        for (String key : keys) {
-            if (key.startsWith("fld")) {
-                fields.add(prefix + key);
-            } else if (key.startsWith("node")) {
-                // node
-                Document node = (Document) doc.get(key);
-                collectFields(node, prefix + key + ".", fields);
-            }
-        }
-    }
+	private void collectFields(Document doc, String prefix, List<String> fields) {
+		Set<String> keys = doc.keySet();
+		for (String key : keys) {
+			if (key.startsWith("fld")) {
+				fields.add(prefix + key);
+			} else if (key.startsWith("node")) {
+				// node
+				Document node = (Document) doc.get(key);
+				collectFields(node, prefix + key + ".", fields);
+			}
+		}
+	}
 
 }

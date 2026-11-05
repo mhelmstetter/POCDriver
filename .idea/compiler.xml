@@ -9,8 +9,5 @@
         <module name="poc-driver" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="poc-driver" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>
